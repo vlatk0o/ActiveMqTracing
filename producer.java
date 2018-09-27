@@ -1,4 +1,4 @@
-package si.iskratel.producer;
+package com.example.producer;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
