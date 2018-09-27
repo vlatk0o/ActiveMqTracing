@@ -1,4 +1,4 @@
-package si.iskratel.consumer;
+package com.example.consumer;
 
 
 import javax.jms.Connection;
