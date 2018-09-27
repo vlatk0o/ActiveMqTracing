@@ -1,4 +1,4 @@
-package si.iskratel.producer;
+package com.example.producer;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -21,14 +21,14 @@ public class producer {
 	private static String url = "tcp://IP:61616";
 	public static JmsTracing jmsTracing;
 	public static Tracing tracing;
-	public static AsyncReporter asyncReporter;
 
 	public static void main(String[] args) throws JMSException {
 
 		
 		URLConnectionSender sender = URLConnectionSender.create("http://IP:9411/api/v1/spans");
-		tracing = Tracing.newBuilder().localServiceName("producer").reporter(AsyncReporter.builder(sender).build())
-				.sampler(Sampler.ALWAYS_SAMPLE).build();
+		AsyncReporter asyncReport = AsyncReporter.builder(sender).build();
+		tracing = Tracing.newBuilder().localServiceName("producer").reporter(asyncReport)
+		    .sampler(Sampler.ALWAYS_SAMPLE).build();
 		jmsTracing = JmsTracing.newBuilder(tracing)
 				.remoteServiceName("my-broker")
 				.build();
@@ -58,8 +58,8 @@ public class producer {
 			producer.send(message);
 			System.out.println("Sent message '" + message.getText() + "'");
 		}
-		
-		Runtime.getRuntime().addShutdownHook(new Thread(asyncReporter::close));
+		asyncReport.flush();
+		connection.close();
 		connection.close();
 	}
 	
