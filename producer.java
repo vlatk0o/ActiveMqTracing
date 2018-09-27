@@ -1,10 +1,8 @@
-package com.example.producer;
+package si.iskratel.producer;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -12,8 +10,6 @@ import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import brave.Span;
-import brave.Tracer.SpanInScope;
 import brave.Tracing;
 import brave.jms.JmsTracing;
 import brave.sampler.Sampler;
@@ -25,10 +21,11 @@ public class producer {
 	private static String url = "tcp://IP:61616";
 	public static JmsTracing jmsTracing;
 	public static Tracing tracing;
+	public static AsyncReporter asyncReporter;
 
 	public static void main(String[] args) throws JMSException {
 
-
+		
 		URLConnectionSender sender = URLConnectionSender.create("http://IP:9411/api/v1/spans");
 		tracing = Tracing.newBuilder().localServiceName("producer").reporter(AsyncReporter.builder(sender).build())
 				.sampler(Sampler.ALWAYS_SAMPLE).build();
@@ -38,7 +35,7 @@ public class producer {
 		
 		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		ConnectionFactory tracingConnectionFactory = jmsTracing.connectionFactory(connectionFactory);
-		Connection connection = connectionFactory.createConnection();
+		Connection connection = tracingConnectionFactory.createConnection();
 		connection.start();
 
 		// JMS messages are sent and received using a Session. We will
@@ -47,6 +44,7 @@ public class producer {
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 		Topic topic = session.createTopic("testt");
+		
 
 		MessageProducer producer = session.createProducer(topic);
 
@@ -60,7 +58,8 @@ public class producer {
 			producer.send(message);
 			System.out.println("Sent message '" + message.getText() + "'");
 		}
-
+		
+		Runtime.getRuntime().addShutdownHook(new Thread(asyncReporter::close));
 		connection.close();
 	}
 	
