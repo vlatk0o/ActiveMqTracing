@@ -15,7 +15,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class consumer {
     // URL of the JMS server
-    private static String url = "tcp://192.168.216.61:61616";
+    private static String url = "tcp://IP:61616";
 
     // Name of the topic from which we will receive messages from = " testt"
 
