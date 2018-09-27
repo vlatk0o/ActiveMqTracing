@@ -22,7 +22,7 @@ import zipkin.reporter.urlconnection.URLConnectionSender;
 
 public class producer {
 
-	private static String url = "tcp://192.168.216.61:61616";
+	private static String url = "tcp://IP:61616";
 	public static JmsTracing jmsTracing;
 	public static Tracing tracing;
 
